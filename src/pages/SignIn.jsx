@@ -1,18 +1,28 @@
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useState } from 'react'
+import { db } from '../firebase'
+import { doc, collection, setDoc} from 'firebase/firestore'
 import {Link} from 'react-router-dom'
 
 const SignIn = () => {
   const [error, setError] = useState('')
+  const userDocumentRef = doc(collection(db, 'users'));
   const handleSubmit = async (event) => {
     event.preventDefault();
     const {name, email, password} = event.currentTarget.elements;
+    const userData = {
+      uid:userDocumentRef.id,
+      name:name.value,
+      email:email.value,
+      password:password.value
+    }
     try {
       await createUserWithEmailAndPassword(auth,email.value,password.value)
+      await setDoc(userDocumentRef,userData)
       
     } catch (error) {
-      console.log(error.message)
+      setError(error.message)
     }
   }
   return (
